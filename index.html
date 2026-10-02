@@ -548,8 +548,9 @@ function fillCreditSelect(){
 }
 
 // ================= MEMBRES =================
-function normalizeNom(s){ return s.toLowerCase().trim().replace(/\s+/g,' '); }
-function normalizeTel(s){ return s.replace(/[\s.\-]/g,''); }
+// Google Sheets peut renvoyer un téléphone sous forme de nombre (ex. 771234567) : on force en texte.
+function normalizeNom(s){ return String(s == null ? '' : s).toLowerCase().trim().replace(/\s+/g,' '); }
+function normalizeTel(s){ return String(s == null ? '' : s).replace(/[\s.\-]/g,''); }
 
 function findDuplicateMembres(nom, telephone){
   const n = normalizeNom(nom), t = normalizeTel(telephone);
@@ -559,6 +560,7 @@ function findDuplicateMembres(nom, telephone){
 let membreDupOverride = false;
 
 document.getElementById('m-submit').addEventListener('click', async ()=>{
+ try{
   const nom = document.getElementById('m-nom').value.trim();
   const telephone = document.getElementById('m-tel').value.trim();
   const errEl = document.getElementById('m-error'), okEl = document.getElementById('m-ok');
@@ -577,6 +579,10 @@ document.getElementById('m-submit').addEventListener('click', async ()=>{
   }
   membreDupOverride = false;
   await creerMembre();
+ }catch(err){
+  console.error(err);
+  document.getElementById('m-error').textContent = "Erreur inattendue : " + (err && err.message ? err.message : err);
+ }
 });
 
 document.getElementById('m-dup-cancel').addEventListener('click', ()=>{
